@@ -280,5 +280,21 @@ pub contract ExampleNFT: NonFungibleToken {
 
     emit ContractInitialized()
   }
+
+  pub fun mintNFT(
+    name: String,
+    description: String,
+    thumbnail: String,
+    royalties: [MetadataViews.Royalty]
+  ): @NFT {
+    // create a new NFT
+    let newNFT <- create NFT(
+      name: name,
+      description: description,
+      thumbnail: thumbnail,
+      royalties: royalties
+    )
+    return <- newNFT;
+  }
 }
  

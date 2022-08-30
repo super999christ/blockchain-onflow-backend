@@ -1,23 +1,44 @@
 //  External Dependencies
 import { Injectable } from '@nestjs/common';
+import * as fcl from '@onflow/fcl';
 
 //  Internal Dependencies
 import { NFT } from './types/nft.types';
+import { authorizationFunction } from '../flow-auth';
+import { mintTx } from '../../cadence/transactions/apis';
 
 @Injectable()
 export class TransactionService {
+  authrization = authorizationFunction(); // authentication
+
   //  Returns Test String
   test(): string {
     return 'GraphQL: Transaction works';
   }
 
   //  Create the NFT on the blockchain and return the transactionID
-  mint(name: string, description: string, thumbnail: string): string {
-    //  TODO: Create the NFT Data
+  async mint(
+    name: string,
+    description: string,
+    thumbnail: string,
+  ): Promise<string> {
+    const transactionId = await fcl.mutate({
+      cadence: mintTx,
+      args: (arg, t) => [
+        arg(String(name), t.String),
+        arg(String(description), t.String),
+        arg(String(thumbnail), t.String),
+      ],
+      proposer: this.authrization,
+      payer: this.authrization,
+      authorizations: [this.authrization],
+      limit: 100,
+    });
 
-    //  TODO: Save the Created NFT on Blockchain
-
-    return 'e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690';
+    await fcl.tx(transactionId).subscribe((res) => {
+      console.log(res);
+    });
+    return transactionId;
   }
 
   //  Get NFT datas from given account on the Blockchain
