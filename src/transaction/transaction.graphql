@@ -1,0 +1,24 @@
+type Query {
+  test: String
+  findMany(address: String!): [NFT]
+  findOne(id: ID!, address: String!): NFT
+}
+
+type Mutation {
+  mint(name: String!, description: String!, thumbnail: String): String
+  burn(id: ID!): String
+  transfer(id: ID!, receiver: String): String
+}
+
+type NFT {
+  id: ID!
+  name: String
+  description: String
+  thumbnail: String
+  file: FileInfo
+  owner: String
+}
+
+type FileInfo {
+  url: String
+}
