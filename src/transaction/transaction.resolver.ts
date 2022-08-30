@@ -19,13 +19,13 @@ export class TransactionResolver {
     mint(name: "Sample Name", description: "Sample description", thumbnail: "Sample thumbnail")
   */
   @Mutation((returns) => String)
-  mint(
+  async mint(
     @Args('name', { type: () => String }) name: string,
     @Args('description', { type: () => String }) description: string,
     @Args('thumbnail', { type: () => String }) thumbnail: string,
-  ): string {
+  ): Promise<string> {
     console.log(name, description, thumbnail);
-    return this.transactionService.mint(name, description, thumbnail);
+    return await this.transactionService.mint(name, description, thumbnail);
   }
 
   /*
