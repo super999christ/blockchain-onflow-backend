@@ -31,7 +31,6 @@ export class TransactionService {
     description: string,
     thumbnail: string
   ): Promise<string> {
-    // excute the mutation
     const transactionId = await fcl.mutate({
       cadence: mintTx,
       args: (arg, t) => [
@@ -46,33 +45,60 @@ export class TransactionService {
     });
 
     await fcl.tx(transactionId).subscribe((res) => {
-      console.log(res);
+      // console.log(res);
     });
     return transactionId;
   }
 
   //  Get NFT datas from given account on the Blockchain
-  async findMany(address: string): Promise<NFT[]> {
+  async findMany(
+    address: string,
+    limit: number,
+    offset: number,
+  ): Promise<NFT[]> {
+    address = address ?? '0x01cf0e2f2f715450';
+    limit = limit ?? 5;
+    offset = offset ?? 0;
     // excute the query
-    const result = await fcl.query({
+    const datas = await fcl.query({
       cadence: findManyTx,
       args: (arg, t) => [arg(address ? address : this.devAddress, t.Address)],
     });
-    console.log(result);
+
+    const processedData = datas.map((item) => {
+      item.file = {};
+      item.file.url = item.thumbnail;
+      return item;
+    });
+
+    const result = [];
+    for (
+      let i = offset * limit;
+      i <
+      ((offset + 1) * limit < processedData.length
+        ? (offset + 1) * limit
+        : processedData.length);
+      i++
+    ) {
+      result.push(processedData[i]);
+    }
+
     return result;
   }
 
   //  Get NFT data from give account with given id on the Blockchain
   async findOne(id: number, address: string): Promise<NFT> {
-    const result = await fcl.query({
+    address = address ?? '0x01cf0e2f2f715450';
+    const data = await fcl.query({
       cadence: findOneTx,
       args: (arg, t) => [
         arg(id.toString(), t.UInt64),
         arg(address ? address : this.devAddress, t.Address),
       ],
     });
-    console.log(result);
-    return result;
+    data.file = {};
+    data.file.url = data.thumbnail;
+    return data;
   }
 
   //  Erase the NFT data from Blockchain
@@ -88,7 +114,7 @@ export class TransactionService {
     });
 
     await fcl.tx(transactionId).subscribe((res) => {
-      console.log(res);
+      // console.log(res);
     });
     return transactionId;
   }
@@ -106,7 +132,7 @@ export class TransactionService {
     });
 
     await fcl.tx(transactionId).subscribe((res) => {
-      console.log(res);
+      // console.log(res);
     });
     return transactionId;
   }
