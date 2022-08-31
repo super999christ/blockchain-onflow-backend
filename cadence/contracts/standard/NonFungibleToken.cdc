@@ -105,6 +105,8 @@ pub contract interface NonFungibleToken {
         pub fun deposit(token: @NFT)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NFT
+        pub fun burn(id: UInt64)
+        pub fun transfer(id: UInt64, recipient: &{NonFungibleToken.CollectionPublic})
     }
 
     // Requirement for the the concrete resource type
