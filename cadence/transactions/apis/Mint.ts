@@ -12,11 +12,11 @@ const mintTx = `
 
         prepare(acct: AuthAccount) {
             self.receiverRef = acct.getCapability<&ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(ExampleNFT.CollectionPublicPath)
-                .borrow()
-                ?? panic("Could not borrow receiver reference")
+                .borrow() ?? panic("Could not borrow receiver reference")
         }
 
         execute {
+            // Create a new NFT
             let newNFT <- ExampleNFT.mintNFT(
                 name: name,
                 description: description,

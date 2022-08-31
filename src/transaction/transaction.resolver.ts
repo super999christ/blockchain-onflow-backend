@@ -39,9 +39,11 @@ export class TransactionResolver {
     }
   */
   @Query((returns) => [NFT])
-  findMany(@Args('address', { type: () => String }) address: string): NFT[] {
+  async findMany(
+    @Args('address', { type: () => String }) address: string,
+  ): Promise<NFT[]> {
     console.log(address);
-    return this.transactionService.findMany(address);
+    return await this.transactionService.findMany(address);
   }
 
   /*
@@ -51,12 +53,12 @@ export class TransactionResolver {
     }
   */
   @Query((returns) => NFT)
-  findOne(
+  async findOne(
     @Args('id', { type: () => ID }) id: number,
     @Args('address', { type: () => String }) address: string,
-  ): NFT {
+  ): Promise<NFT> {
     console.log(id, address);
-    return this.transactionService.findOne(id, address);
+    return await this.transactionService.findOne(id, address);
   }
 
   /*
@@ -64,9 +66,9 @@ export class TransactionResolver {
     burn(id: 1)
   */
   @Mutation((returns) => String)
-  burn(@Args('id', { type: () => ID }) id: number): string {
+  async burn(@Args('id', { type: () => ID }) id: number): Promise<string> {
     console.log(id);
-    return this.transactionService.burn(id);
+    return await this.transactionService.burn(id);
   }
 
   /*
@@ -74,11 +76,11 @@ export class TransactionResolver {
     transfer(id: 1, receiver: "0x01cf0e2f2f715450")
   */
   @Mutation((returns) => String)
-  transfer(
+  async transfer(
     @Args('id', { type: () => ID }) id: number,
     @Args('receiver', { type: () => String }) receiver: string,
-  ) {
+  ): Promise<string> {
     console.log(id, receiver);
-    return this.transactionService.transfer(id, receiver);
+    return await this.transactionService.transfer(id, receiver);
   }
 }
