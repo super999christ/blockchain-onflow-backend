@@ -1,5 +1,8 @@
 //  External Dependencies
-import { Query, Resolver, Mutation, Args, ID } from '@nestjs/graphql';
+import { BadRequestException, HttpException } from '@nestjs/common';
+import { Query, Resolver, Mutation, Args, ID, Int } from '@nestjs/graphql';
+import { throwHttpGraphQLError } from 'apollo-server-core/dist/runHttpQuery';
+import FormatError from 'easygraphql-format-error';
 
 //  Internal Dependencies
 import { TransactionService } from './transaction.service';
@@ -11,6 +14,10 @@ export class TransactionResolver {
 
   @Query()
   test(): string {
+    const formatError = new FormatError();
+    const errorName = formatError.errorName;
+    // throw Error(errorName.NOT_FOUND);    //  Not Found
+    // throw Error(errorName.BAD_REQUEST); //  Bad Request
     return this.transactionService.test();
   }
 
@@ -24,39 +31,36 @@ export class TransactionResolver {
     @Args('description', { type: () => String }) description: string,
     @Args('thumbnail', { type: () => String }) thumbnail: string,
   ): Promise<string> {
-    console.log(name, description, thumbnail);
     return await this.transactionService.mint(name, description, thumbnail);
   }
 
   /*
   Pattern: 
-    findMany(address: "111111") {
-        name, 
-        description, 
-        file {
-          url
+    findMany(address: "0x01cf0e2f2f715450", limit: 5, offset: 2) {
+          name, description, file {url}
         }
-    }
   */
   @Query((returns) => [NFT])
-  findMany(@Args('address', { type: () => String }) address: string): NFT[] {
-    console.log(address);
-    return this.transactionService.findMany(address);
+  async findMany(
+    @Args('address', { type: () => String }) address: string,
+    @Args('limit', { type: () => Int }) limit: number,
+    @Args('offset', { type: () => Int }) offset: number,
+  ): Promise<NFT[]> {
+    return await this.transactionService.findMany(address, limit, offset);
   }
 
   /*
   Pattern: 
-    findOne(id: 0, address: "111111") {
-        name, description, file {url}
-    }
+    findOne(id: 2, address: "0x01cf0e2f2f715450") {
+            name, description, file {url}
+          }
   */
   @Query((returns) => NFT)
-  findOne(
+  async findOne(
     @Args('id', { type: () => ID }) id: number,
     @Args('address', { type: () => String }) address: string,
-  ): NFT {
-    console.log(id, address);
-    return this.transactionService.findOne(id, address);
+  ): Promise<NFT> {
+    return await this.transactionService.findOne(id, address);
   }
 
   /*
@@ -64,9 +68,8 @@ export class TransactionResolver {
     burn(id: 1)
   */
   @Mutation((returns) => String)
-  burn(@Args('id', { type: () => ID }) id: number): string {
-    console.log(id);
-    return this.transactionService.burn(id);
+  async burn(@Args('id', { type: () => ID }) id: number): Promise<string> {
+    return await this.transactionService.burn(id);
   }
 
   /*
@@ -74,11 +77,10 @@ export class TransactionResolver {
     transfer(id: 1, receiver: "0x01cf0e2f2f715450")
   */
   @Mutation((returns) => String)
-  transfer(
+  async transfer(
     @Args('id', { type: () => ID }) id: number,
     @Args('receiver', { type: () => String }) receiver: string,
-  ) {
-    console.log(id, receiver);
-    return this.transactionService.transfer(id, receiver);
+  ): Promise<string> {
+    return await this.transactionService.transfer(id, receiver);
   }
 }

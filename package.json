@@ -28,6 +28,7 @@
     "@nestjs/platform-express": "^9.0.0",
     "@onflow/fcl": "^1.2.0",
     "apollo-server-express": "^3.10.2",
+    "easygraphql-format-error": "^0.0.3",
     "graphql": "^16.6.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
