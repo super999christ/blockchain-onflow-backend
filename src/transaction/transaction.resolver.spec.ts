@@ -10,13 +10,11 @@ describe("TransactionResolver", () => {
       providers: [
         TransactionResolver,
         {
-          provide: TransactionResolver,
+          provide: TransactionService,
           useFactory: () => ({
             mint: jest.fn(
-              (name: string, description: string, thumbnail: string) => ({
-                transactionId:
-                  "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690",
-              })
+              (name: string, description: string, thumbnail: string) => 
+                "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690"
             ),
 
             findMany: jest.fn((address: string) => [
@@ -61,14 +59,12 @@ describe("TransactionResolver", () => {
               },
               owner: "owner1",
             })),
-            burn: jest.fn((id: number) => ({
-              transactionId:
-                "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690",
-            })),
-            transfer: jest.fn((id: number, receiver: string) => ({
-              transactionId:
-                "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690",
-            })),
+            burn: jest.fn((id: number) => (
+                "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690"
+            )),
+            transfer: jest.fn((id: number, receiver: string) => (
+                "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690"
+            )),
           }),
         },
       ],
