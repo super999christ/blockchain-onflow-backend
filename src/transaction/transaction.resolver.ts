@@ -56,11 +56,12 @@ export class TransactionResolver {
           }
   */
   @Query((returns) => NFT)
-  async findOne(
+  findOne(
     @Args('id', { type: () => ID }) id: number,
     @Args('address', { type: () => String }) address: string,
   ): Promise<NFT> {
-    return await this.transactionService.findOne(id, address);
+    console.log(id, address);
+    return this.transactionService.findOne(id, address);
   }
 
   /*
@@ -68,8 +69,9 @@ export class TransactionResolver {
     burn(id: 1)
   */
   @Mutation((returns) => String)
-  async burn(@Args('id', { type: () => ID }) id: number): Promise<string> {
-    return await this.transactionService.burn(id);
+  burn(@Args('id', { type: () => ID }) id: number): Promise<string> {
+    // console.log(id);
+    return this.transactionService.burn(id);
   }
 
   /*
@@ -77,10 +79,11 @@ export class TransactionResolver {
     transfer(id: 1, receiver: "0x01cf0e2f2f715450")
   */
   @Mutation((returns) => String)
-  async transfer(
+  transfer(
     @Args('id', { type: () => ID }) id: number,
     @Args('receiver', { type: () => String }) receiver: string,
   ): Promise<string> {
-    return await this.transactionService.transfer(id, receiver);
+    console.log(id, receiver);
+    return this.transactionService.transfer(id, receiver);
   }
 }

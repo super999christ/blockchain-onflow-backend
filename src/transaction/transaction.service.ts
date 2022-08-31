@@ -5,6 +5,8 @@ import * as fcl from '@onflow/fcl';
 //  Internal Dependencies
 import { NFT } from './types/nft.types';
 import { authorizationFunction } from '../flow-auth';
+import Flow from '../../flow.json';
+
 import {
   mintTx,
   findManyTx,
@@ -16,6 +18,7 @@ import {
 @Injectable()
 export class TransactionService {
   authrization = authorizationFunction(); // authentication
+  devAddress = `0x${Flow.accounts['dev-account'].address}`;
 
   //  Returns Test String
   test(): string {
@@ -28,7 +31,6 @@ export class TransactionService {
     description: string,
     thumbnail: string,
   ): Promise<string> {
-    // excute the mutation
     const transactionId = await fcl.mutate({
       cadence: mintTx,
       args: (arg, t) => [
@@ -57,7 +59,7 @@ export class TransactionService {
     // excute the query
     const datas = await fcl.query({
       cadence: findManyTx,
-      args: (arg, t) => [arg(address, t.Address)],
+      args: (arg, t) => [arg(address ? address : this.devAddress, t.Address)],
     });
 
     const processedData = datas.map((item) => {
@@ -85,7 +87,10 @@ export class TransactionService {
   async findOne(id: number, address: string): Promise<NFT> {
     const data = await fcl.query({
       cadence: findOneTx,
-      args: (arg, t) => [arg(id.toString(), t.UInt64), arg(address, t.Address)],
+      args: (arg, t) => [
+        arg(id.toString(), t.UInt64),
+        arg(address ? address : this.devAddress, t.Address),
+      ],
     });
     data.file = {};
     data.file.url = data.thumbnail;
