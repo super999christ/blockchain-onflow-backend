@@ -56,6 +56,9 @@ export class TransactionService {
     limit: number,
     offset: number,
   ): Promise<NFT[]> {
+    address = address ?? '0x01cf0e2f2f715450';
+    limit = limit ?? 5;
+    offset = offset ?? 0;
     // excute the query
     const datas = await fcl.query({
       cadence: findManyTx,
@@ -85,6 +88,7 @@ export class TransactionService {
 
   //  Get NFT data from give account with given id on the Blockchain
   async findOne(id: number, address: string): Promise<NFT> {
+    address = address ?? '0x01cf0e2f2f715450';
     const data = await fcl.query({
       cadence: findOneTx,
       args: (arg, t) => [
