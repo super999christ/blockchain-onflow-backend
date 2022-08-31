@@ -1,6 +1,7 @@
 import * as fcl from '@onflow/fcl';
 import { ec as EC } from 'elliptic';
 import { SHA3 } from 'sha3';
+
 const ec: EC = new EC('p256');
 
 const hashMsg = (msg: string) => {
