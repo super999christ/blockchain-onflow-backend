@@ -1,7 +1,7 @@
 type Query {
   test: String
-  findMany(address: String!, limit: Int!, offset: Int!): [NFT]
-  findOne(id: ID!, address: String!): NFT
+  findMany(address: String, limit: Int, offset: Int): [NFT]
+  findOne(id: ID!, address: String): NFT
 }
 
 type Mutation {
