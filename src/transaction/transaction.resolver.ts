@@ -46,11 +46,7 @@ export class TransactionResolver {
     @Args('limit', { type: () => Int }) limit: number,
     @Args('offset', { type: () => Int }) offset: number,
   ): Promise<NFT[]> {
-    return await this.transactionService.findMany(
-      address ?? '0x01cf0e2f2f715450',
-      limit ?? 5,
-      offset ?? 0,
-    );
+    return await this.transactionService.findMany(address, limit, offset);
   }
 
   /*
@@ -65,7 +61,7 @@ export class TransactionResolver {
     @Args('address', { type: () => String }) address: string,
   ): Promise<NFT> {
     console.log(id, address);
-    return this.transactionService.findOne(id, address ?? '0x01cf0e2f2f715450');
+    return this.transactionService.findOne(id, address);
   }
 
   /*
