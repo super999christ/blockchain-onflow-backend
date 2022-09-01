@@ -1,26 +1,30 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { TransactionService } from "./transaction.service";
-import { BadRequestException } from "@nestjs/common";
-import { Data } from "./data.interface";
 
-const setData = (fakedata) => {
-
-};
-
-const mockData = (id, name, description, thumbnail): Data => ({
-  id,
-  name,
-  description,
-  thumbnail,
-});
-
-const getMetaData = () => {
-  return;
-};
+import "../flow-config";
 
 describe("TransactionService", () => {
   // eslint-disable-next-line prettier/prettier
   let service: TransactionService;
+  let addedID;
+  let transferData;
+
+  const fakeData = [
+    { name: "fake1", description: "fake1", thumbnail: "fake1" },
+    { name: "fake2", description: "fake2", thumbnail: "fake2" },
+    { name: "fake3", description: "fake3", thumbnail: "fake3" },
+    { name: "fake4", description: "fake4", thumbnail: "fake4" },
+  ];
+
+  const compareData = (source, nft) => {
+    if (
+      source.name === nft.name &&
+      source.description === nft.description &&
+      source.thumbnail === nft.thumbnail
+    )
+      return true;
+    return false;
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,29 +32,8 @@ describe("TransactionService", () => {
     }).compile();
     service = module.get<TransactionService>(TransactionService);
 
-    const fakeData = [
-      {
-        id: 0,
-        name: "name1",
-        description: "desc1",
-        thumbnail: "thumb1",
-      },
-      {
-        id: 1,
-        name: "name2",
-        description: "desc2",
-        thumbnail: "thumb2",
-      },
-      {
-        id: 2,
-        name: "name3",
-        description: "desc3",
-        thumbnail: "thumb3",
-      },
-    ];
-    setData(fakeData);
-
-    // addData
+    const nftData = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
+    console.log(nftData);
   });
 
   it("should be defined", () => {
@@ -59,100 +42,108 @@ describe("TransactionService", () => {
 
   describe("mint", () => {
     // eslint-disable-next-line prettier/prettier
-    it('should create an ExampleNFT on the blockchain ', () => {
-      // expect(
-      //   service.mint(
-      //     'A sample name.',
-      //     'A sample description.',
-      //     'A sample thumbnail.',
-      //   )
-      // ).toEqual(
-      //   'e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690'
-      // );
-      expect(() => {
-        const result = service.mint(
-          "A sample name.",
-          "A sample description.",
-          "A sample thumbnail."
-        );
-        const regPattern = /[0-9a-f]{64}/g;
-        expect(regPattern.test(result)).toBe(true);
-      });
-    });
-  });
+    it("should create an NFT on the blockchain ", async () => {
+      const result = await service.mint("Test-Mint", "Test-Mint", "Test-Mint");
 
-  describe("findMany", () => {
-    it("should take an address as input and return all the NFTs owned by the address", () => {
-      expect(service.findMany("0x01cf0e2f2f715450")).toEqual([
-        {
-          id: 0,
-          name: "name1",
-          description: "desc1",
-          thumbnail: "thumb1",
-        },
-        {
-          id: 1,
-          name: "name2",
-          description: "desc2",
-          thumbnail: "thumb2",
-        },
-      ]);
+      const nftDatas = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
+      const createdNFT = nftDatas.find((nft) => {
+        if (
+          nft.name === "Test-Mint" &&
+          nft.description === "Test-Mint" &&
+          nft.thumbnail === "Test-Mint"
+        )
+          return nft;
+      });
+      expect(createdNFT).not.toBe(undefined);
+      addedID = createdNFT.id;
+
+      const regPattern = /[0-9a-f]{64}/g;
+      expect(regPattern.test(result)).toBe(true);
     });
   });
 
   describe("findOne", () => {
-    it("should take an address and NFT ID as input", () => {
-      expect(service.findOne(0, "0x01cf0e2f2f715450")).toEqual({
-        data: {
-          name: "name1",
-          description: "desc1",
-          thumbnail: "thumb1",
-        },
-      });
+    it("should return an NFT with specified ID", async () => {
+      const result = await service.findOne(addedID, "0x01cf0e2f2f715450");
+      expect(
+        result.name === "Test-Mint" &&
+          result.description === "Test-Mint" &&
+          result.thumbnail === "Test-Mint"
+      ).toBe(true);
     });
   });
 
   describe("burn", () => {
-    it("should take an NFT ID as input and delete the ExampleNFT with the corresponding ID from our development account", () => {
-      expect(() => {
-        const result = service.burn(0);
-        const regPattern = /[0-9a-f]{64}/g;
-        expect(regPattern.test(result)).toBe(true);
-        const fakeData1 = [
-          {
-            id: 1,
-            name: "name2",
-            description: "desc2",
-            thumbnail: "thumb2",
-            file: {
-              url: "fake2",
-            },
-            owner: "owner2",
-          },
-          {
-            id: 2,
-            name: "name3",
-            description: "desc3",
-            thumbnail: "thumb3",
-            file: {
-              url: "fake3",
-            },
-            owner: "owner3",
-          },
-        ];
-        const metaData = getMetaData();
-        expect(metaData).toEqual(fakeData1);
+    it("should delete the NFT from blockchain", async () => {
+      const result = await service.burn(addedID);
+
+      const regPattern = /[0-9a-f]{64}/g;
+      expect(regPattern.test(result)).toBe(true);
+
+      const nftDatas = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
+      const createdNFT = nftDatas.find((nft) => {
+        if (nft.id === addedID) return nft;
       });
+      expect(createdNFT).toBe(undefined);
     });
   });
 
-  describe("transfer", () => {
-    it("should transfer a specific ExampleNFT from our development account to the specified address", () => {
-      expect(() => {
-        const result = service.transfer(0, "0x01cf0e2f2f715450");
+  describe("findMany", () => {
+    it("should return all the created data", async () => {
+      let i;
+      for (i = 0; i < 4; i++) {
+        const tId = await service.mint(
+          fakeData[i].name,
+          fakeData[i].description,
+          fakeData[i].thumbnail
+        );
         const regPattern = /[0-9a-f]{64}/g;
-        expect(regPattern.test(result)).toBe(true);
+        expect(regPattern.test(tId)).toBe(true);
+      }
+
+      const nftData = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
+      nftData.sort((nftA, nftB) => {
+        if (nftA.id < nftB.id) return -1;
+        else if (nftA.id > nftB.id) return 1;
+        else return 0;
       });
+      const addedData = nftData.slice(-4);
+      expect(addedData.length).toBe(4);
+      transferData = addedData[i];
+      for (let i = 0; i < 4; i++) {
+        expect(compareData(fakeData[i], addedData[i])).toBe(true);
+      }
     });
   });
+
+  // describe("transfer", () => {
+  //   it("should check whether it is transfered", async () => {
+  //     // const txID = await service.transfer(
+  //     //   transferData.id,
+  //     //   "0xf8d6e0586b0a20c7"
+  //     // );
+  //     // const regPattern = /[0-9a-f]{64}/g;
+  //     // expect(regPattern.test(txID)).toBe(true);
+
+  //     // let nftData = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
+  //     // nftData.sort((nftA, nftB) => {
+  //     //   if (nftA.id < nftB.id) return -1;
+  //     //   else if (nftA.id > nftB.id) return 1;
+  //     //   else return 0;
+  //     // });
+  //     // const resultA = nftData.find((item) => {
+  //     //   if (item.id === transferData.id) return item;
+  //     // });
+  //     // expect(resultA).toBe(undefined);
+
+  //     // nftData = await service.findMany("0xf8d6e0586b0a20c7", 10000, 0);
+  //     // nftData.sort((nftA, nftB) => {
+  //     //   if (nftA.id > nftB.id) return -1;
+  //     //   else if (nftA.id < nftB.id) return 1;
+  //     //   else return 0;
+  //     // });
+  //     // const transferedData = nftData[0];
+  //     // expect(compareData(transferData, transferedData)).toBe(true);
+  //   });
+  // });
 });

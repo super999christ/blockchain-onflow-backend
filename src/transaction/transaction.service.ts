@@ -3,9 +3,9 @@ import { Injectable } from "@nestjs/common";
 import * as fcl from "@onflow/fcl";
 
 //  Internal Dependencies
-import { NFT } from './types/nft.types';
-import { authorizationFunction } from '../flow-auth';
-import Flow from '../../flow.json';
+import { NFT } from "./types/nft.types";
+import { authorizationFunction } from "../flow-auth";
+import Flow from "../../flow.json";
 
 import {
   mintTx,
@@ -13,12 +13,19 @@ import {
   findOneTx,
   burnTx,
   transferTx,
-} from '../../cadence/transactions/apis';
+} from "../../cadence/transactions/apis";
 
 @Injectable()
 export class TransactionService {
-  authrization = authorizationFunction(); // authentication
-  devAddress = `0x${Flow.accounts['dev-account'].address}`;
+  authrization = authorizationFunction(
+    Flow.accounts["dev-account"].address,
+    Flow.accounts["dev-account"].key
+  ); // authentication
+  authrization1 = authorizationFunction(
+    Flow.accounts["emulator-account"].address,
+    Flow.accounts["emulator-account"].key
+  ); // authentication
+  devAddress = `0x${Flow.accounts["dev-account"].address}`;
 
   //  Returns Test String
   test(): string {
@@ -54,9 +61,8 @@ export class TransactionService {
   async findMany(
     address: string,
     limit: number,
-    offset: number,
+    offset: number
   ): Promise<NFT[]> {
-    address = address ?? '0x01cf0e2f2f715450';
     limit = limit ?? 5;
     offset = offset ?? 0;
     // excute the query
@@ -88,7 +94,6 @@ export class TransactionService {
 
   //  Get NFT data from give account with given id on the Blockchain
   async findOne(id: number, address: string): Promise<NFT> {
-    address = address ?? '0x01cf0e2f2f715450';
     const data = await fcl.query({
       cadence: findOneTx,
       args: (arg, t) => [

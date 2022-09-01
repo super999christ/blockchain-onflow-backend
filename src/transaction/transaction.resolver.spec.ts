@@ -13,42 +13,44 @@ describe("TransactionResolver", () => {
           provide: TransactionService,
           useFactory: () => ({
             mint: jest.fn(
-              (name: string, description: string, thumbnail: string) => 
+              (name: string, description: string, thumbnail: string) =>
                 "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690"
             ),
 
-            findMany: jest.fn((address: string) => [
-              {
-                id: 0,
-                name: "name1",
-                description: "desc1",
-                thumbnail: "thumb1",
-                file: {
-                  url: "fake1",
+            findMany: jest.fn(
+              (address: string, limit: number, offset: number) => [
+                {
+                  id: 0,
+                  name: "name1",
+                  description: "desc1",
+                  thumbnail: "thumb1",
+                  file: {
+                    url: "fake1",
+                  },
+                  owner: "owner1",
                 },
-                owner: "owner1",
-              },
-              {
-                id: 1,
-                name: "name2",
-                description: "desc2",
-                thumbnail: "thumb2",
-                file: {
-                  url: "fake2",
+                {
+                  id: 1,
+                  name: "name2",
+                  description: "desc2",
+                  thumbnail: "thumb2",
+                  file: {
+                    url: "fake2",
+                  },
+                  owner: "owner2",
                 },
-                owner: "owner2",
-              },
-              {
-                id: 2,
-                name: "name3",
-                description: "desc3",
-                thumbnail: "thumb3",
-                file: {
-                  url: "fake3",
+                {
+                  id: 2,
+                  name: "name3",
+                  description: "desc3",
+                  thumbnail: "thumb3",
+                  file: {
+                    url: "fake3",
+                  },
+                  owner: "owner3",
                 },
-                owner: "owner3",
-              },
-            ]),
+              ]
+            ),
             findOne: jest.fn((id: number, address: string) => ({
               id: 0,
               name: "name1",
@@ -59,12 +61,14 @@ describe("TransactionResolver", () => {
               },
               owner: "owner1",
             })),
-            burn: jest.fn((id: number) => (
+            burn: jest.fn(
+              (id: number) =>
                 "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690"
-            )),
-            transfer: jest.fn((id: number, receiver: string) => (
+            ),
+            transfer: jest.fn(
+              (id: number, receiver: string) =>
                 "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690"
-            )),
+            ),
           }),
         },
       ],
@@ -78,9 +82,10 @@ describe("TransactionResolver", () => {
 
   describe("mint", () => {
     // eslint-disable-next-line prettier/prettier
-        it('should create an ExampleNFT on the blockchain ', () => {
+    // resolver, service
+    it("should create an ExampleNFT on the blockchain ", async () => {
       expect(
-        resolver.mint(
+        await resolver.mint(
           "A sample name.",
           "A sample description.",
           "A sample thumbnail."
@@ -92,8 +97,8 @@ describe("TransactionResolver", () => {
   });
 
   describe("findMany", () => {
-    it("should take an address as input and return all the NFTs owned by the address", () => {
-      expect(resolver.findMany("0x01cf0e2f2f715450")).toEqual([
+    it("should take an address as input and return all the NFTs owned by the address", async () => {
+      expect(await resolver.findMany("0x01cf0e2f2f715450", 5, 0)).toEqual([
         {
           id: 0,
           name: "name1",
@@ -129,8 +134,8 @@ describe("TransactionResolver", () => {
   });
 
   describe("findOne", () => {
-    it("should take an address and NFT ID as input", () => {
-      expect(resolver.findOne(0, "0x01cf0e2f2f715450")).toEqual({
+    it("should take an address and NFT ID as input", async () => {
+      expect(await resolver.findOne(0, "0x01cf0e2f2f715450")).toEqual({
         id: 0,
         name: "name1",
         description: "desc1",
@@ -144,17 +149,17 @@ describe("TransactionResolver", () => {
   });
 
   describe("burn", () => {
-    it("should take an NFT ID as input and delete the ExampleNFT with the corresponding ID from our development account", () => {
-      expect(resolver.burn(0)).toEqual(
+    it("should take an NFT ID as input and delete the ExampleNFT with the corresponding ID from our development account", async () => {
+      expect(await resolver.burn(0)).toEqual(
         "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690"
       );
     });
   });
 
   describe("transfer", () => {
-    it("should transfer a specific ExampleNFT from our development account to the specified address", () => {
+    it("should transfer a specific ExampleNFT from our development account to the specified address", async () => {
       expect(
-        resolver.transfer(
+        await resolver.transfer(
           // The ID of the NFT to transfer
           0,
           // The address of the account that will receive the NFT
