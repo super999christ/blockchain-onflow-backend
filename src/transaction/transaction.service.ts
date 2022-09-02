@@ -18,10 +18,10 @@ import {
 @Injectable()
 export class TransactionService {
   authrization = authorizationFunction(
-    Flow.accounts['dev-account'].address,
-    Flow.accounts['dev-account'].key,
+    Flow.accounts["dev-account"].address,
+    Flow.accounts["dev-account"].key
   ); // authentication
-  devAddress = `0x${Flow.accounts['dev-account'].address}`;
+  devAddress = `0x${Flow.accounts["dev-account"].address}`;
 
   //  Returns Test String
   test(): string {
@@ -34,6 +34,7 @@ export class TransactionService {
     description: string,
     thumbnail: string
   ): Promise<string> {
+    // execute the mutation
     const transactionId = await fcl.mutate({
       cadence: mintTx,
       args: (arg, t) => [
@@ -47,9 +48,6 @@ export class TransactionService {
       limit: 100,
     });
 
-    await fcl.tx(transactionId).subscribe((res) => {
-      // console.log(res);
-    });
     return transactionId;
   }
 
@@ -61,7 +59,7 @@ export class TransactionService {
   ): Promise<NFT[]> {
     limit = limit ?? 5;
     offset = offset ?? 0;
-    // excute the query
+    // execute the query
     const datas = await fcl.query({
       cadence: findManyTx,
       args: (arg, t) => [arg(address ? address : this.devAddress, t.Address)],
@@ -90,6 +88,7 @@ export class TransactionService {
 
   //  Get NFT data from give account with given id on the Blockchain
   async findOne(id: number, address: string): Promise<NFT> {
+    // execute the query
     const data = await fcl.query({
       cadence: findOneTx,
       args: (arg, t) => [
@@ -114,9 +113,6 @@ export class TransactionService {
       limit: 100,
     });
 
-    await fcl.tx(transactionId).subscribe((res) => {
-      // console.log(res);
-    });
     return transactionId;
   }
 
@@ -132,9 +128,6 @@ export class TransactionService {
       limit: 100,
     });
 
-    await fcl.tx(transactionId).subscribe((res) => {
-      // console.log(res);
-    });
     return transactionId;
   }
 }

@@ -1,15 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { GraphQLModule } from '@nestjs/graphql';
-import request from 'supertest';
+import { Test, TestingModule } from "@nestjs/testing";
+import { INestApplication } from "@nestjs/common";
+import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
+import { GraphQLModule } from "@nestjs/graphql";
+import request from "supertest";
 
-import { AppModule } from '../src/app.module';
-import { TransactionModule } from '../src/transaction/transaction.module';
+import { AppModule } from "../src/app.module";
+import { TransactionModule } from "../src/transaction/transaction.module";
 
-import '../src/flow-config';
+import "../src/flow-config";
 
-describe('AppController (e2e)', () => {
+describe("AppController (e2e)", () => {
   let app: INestApplication;
 
   beforeEach(async () => {
@@ -20,7 +20,7 @@ describe('AppController (e2e)', () => {
         TransactionModule,
         GraphQLModule.forRoot<ApolloDriverConfig>({
           driver: ApolloDriver,
-          typePaths: ['./**/*.graphql'],
+          typePaths: ["./**/*.graphql"],
           installSubscriptionHandlers: true,
         }),
       ],
@@ -34,46 +34,47 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
+  let token;
   //  Validate NFT Object
   const validateNFT = (item) => {
     if (
       item.name !== null &&
       item.name !== undefined &&
-      typeof item.name !== 'string'
+      typeof item.name !== "string"
     )
       return false;
     if (
       item.description !== null &&
       item.description !== undefined &&
-      typeof item.description !== 'string'
+      typeof item.description !== "string"
     )
       return false;
     if (
       item.file.url !== null &&
       item.file.url !== undefined &&
-      typeof item.file.url !== 'string'
+      typeof item.file.url !== "string"
     )
       return false;
     return true;
   };
 
   //  Sample E2E test
-  it('/ (GET)', async () => {
+  it("/ (GET)", async () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get("/")
       .expect(200)
-      .expect('Hello World!');
+      .expect("Hello World!");
   });
 
   //  Test: GraphQL / test
   //  Acceptance Criteria:
   //    1. Status code must be 200;
   //    2. Returning value equals "GraphQL: Transaction works";
-  it('GraphQL: test (query)', async () => {
+  it("GraphQL: test (query)", async () => {
     return request(app.getHttpServer())
-      .post('/graphql')
+      .post("/graphql")
       .send({
-        operationName: 'test',
+        operationName: "test",
         query: `query test {
         test
       }`,
@@ -81,7 +82,7 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .expect(({ body }) => {
         const data = body.data.test;
-        expect(data).toBe('GraphQL: Transaction works');
+        expect(data).toBe("GraphQL: Transaction works");
       });
   });
 
@@ -90,11 +91,11 @@ describe('AppController (e2e)', () => {
   //    1. Status code must be 200;
   //    2. Length of returning value must be 64;
   //    3. Type of returning value must includes only 'a ~ f, 0 ~ 9';
-  it('GraphQL: mint (mutation)', async () => {
+  it("GraphQL: mint (mutation)", async () => {
     return request(app.getHttpServer())
-      .post('/graphql')
+      .post("/graphql")
       .send({
-        operationName: 'testMint',
+        operationName: "testMint",
         query: `mutation testMint {
           mint(name: "Sample Name", description: "Sample description", thumbnail: "Sample thumbnail")
         }`,
@@ -113,11 +114,11 @@ describe('AppController (e2e)', () => {
   //    2. Type of returning value must be Array;
   //    3. Length of returning value must be greater than 0;
   //    4. Type of each item must be NFT;
-  it('GraphQL: findMany (query)', () => {
+  it("GraphQL: findMany (query)", () => {
     return request(app.getHttpServer())
-      .post('/graphql')
+      .post("/graphql")
       .send({
-        operationName: 'testFindMany',
+        operationName: "testFindMany",
         query: `query testFindMany {
         findMany(address: "0x01cf0e2f2f715450", limit: 5, offset: 2) {
           name, description, file {url}
@@ -139,13 +140,13 @@ describe('AppController (e2e)', () => {
   //    1. Status code must be 200;
   //    2. Returning value must be exist, not null or undefined
   //    3. Type of returning value must be NFT
-  it('GraphQL: findOne (query)', async () => {
+  it("GraphQL: findOne (query)", async () => {
     return request(app.getHttpServer())
-      .post('/graphql')
+      .post("/graphql")
       .send({
-        operationName: 'testFindOne',
+        operationName: "testFindOne",
         query: `query testFindOne {
-        findOne(id: 2, address: "0x01cf0e2f2f715450") {
+        findOne(id: 0, address: "0x01cf0e2f2f715450") {
             name, description, file {url}
           }
         }`,
@@ -164,11 +165,11 @@ describe('AppController (e2e)', () => {
   //    1. Status code must be 200;
   //    2. Length of returning value must be 64;
   //    3. Type of returning value must includes only 'a ~ f, 0 ~ 9';
-  it('GraphQL: burn (mutation)', () => {
+  it("GraphQL: burn (mutation)", () => {
     return request(app.getHttpServer())
-      .post('/graphql')
+      .post("/graphql")
       .send({
-        operationName: 'testBurn',
+        operationName: "testBurn",
         query: `mutation testBurn {
         burn(id: 1)
       }`,
@@ -186,11 +187,11 @@ describe('AppController (e2e)', () => {
   //    1. Status code must be 200;
   //    2. Length of returning value must be 64;
   //    3. Type of returning value must includes only 'a ~ f, 0 ~ 9';
-  it('GraphQL: transfer (mutation)', () => {
+  it("GraphQL: transfer (mutation)", () => {
     return request(app.getHttpServer())
-      .post('/graphql')
+      .post("/graphql")
       .send({
-        operationName: 'testTransfer',
+        operationName: "testTransfer",
         query: `mutation testTransfer {
         transfer(id: 1, receiver: "0x01cf0e2f2f715450")
       }`,

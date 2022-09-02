@@ -3,11 +3,14 @@ import { TransactionService } from "./transaction.service";
 
 import "../flow-config";
 
+jest.useRealTimers();
+
 describe("TransactionService", () => {
   // eslint-disable-next-line prettier/prettier
   let service: TransactionService;
   let addedID;
   let transferData;
+  let addedToken = [];
 
   const fakeData = [
     { name: "fake1", description: "fake1", thumbnail: "fake1" },
@@ -31,9 +34,6 @@ describe("TransactionService", () => {
       providers: [TransactionService],
     }).compile();
     service = module.get<TransactionService>(TransactionService);
-
-    const nftData = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
-    console.log(nftData);
   });
 
   it("should be defined", () => {
@@ -109,41 +109,41 @@ describe("TransactionService", () => {
       });
       const addedData = nftData.slice(-4);
       expect(addedData.length).toBe(4);
-      transferData = addedData[i];
+      transferData = addedData[0];
+      addedToken = addedData;
+
       for (let i = 0; i < 4; i++) {
         expect(compareData(fakeData[i], addedData[i])).toBe(true);
       }
     });
   });
 
-  // describe("transfer", () => {
-  //   it("should check whether it is transfered", async () => {
-  //     // const txID = await service.transfer(
-  //     //   transferData.id,
-  //     //   "0xf8d6e0586b0a20c7"
-  //     // );
-  //     // const regPattern = /[0-9a-f]{64}/g;
-  //     // expect(regPattern.test(txID)).toBe(true);
+  describe("transfer", () => {
+    it("should check whether it is transfered", async () => {
+      const txID = await service.transfer(
+        transferData.id,
+        "0xf8d6e0586b0a20c7"
+      );
+      const regPattern = /[0-9a-f]{64}/g;
+      expect(regPattern.test(txID)).toBe(true);
+      let nftData = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
+      nftData.sort((nftA, nftB) => {
+        if (nftA.id < nftB.id) return -1;
+        else if (nftA.id > nftB.id) return 1;
+        else return 0;
+      });
+      const resultA = nftData.find((item) => {
+        if (item.id === transferData.id) return item;
+      });
+      expect(resultA).toBe(undefined);
+      nftData = await service.findMany("0xf8d6e0586b0a20c7", 10000, 0);
 
-  //     // let nftData = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
-  //     // nftData.sort((nftA, nftB) => {
-  //     //   if (nftA.id < nftB.id) return -1;
-  //     //   else if (nftA.id > nftB.id) return 1;
-  //     //   else return 0;
-  //     // });
-  //     // const resultA = nftData.find((item) => {
-  //     //   if (item.id === transferData.id) return item;
-  //     // });
-  //     // expect(resultA).toBe(undefined);
+      const transferedData = nftData.find((nft) => nft.id === transferData.id);
+      expect(compareData(transferData, transferedData)).toBe(true);
 
-  //     // nftData = await service.findMany("0xf8d6e0586b0a20c7", 10000, 0);
-  //     // nftData.sort((nftA, nftB) => {
-  //     //   if (nftA.id > nftB.id) return -1;
-  //     //   else if (nftA.id < nftB.id) return 1;
-  //     //   else return 0;
-  //     // });
-  //     // const transferedData = nftData[0];
-  //     // expect(compareData(transferData, transferedData)).toBe(true);
-  //   });
-  // });
+      for (let i = 0; i < addedToken.length; i++) {
+        await service.burn(addedToken[i].id);
+      }
+    });
+  });
 });

@@ -14,10 +14,6 @@ export class TransactionResolver {
 
   @Query()
   test(): string {
-    const formatError = new FormatError();
-    const errorName = formatError.errorName;
-    // throw Error(errorName.NOT_FOUND);    //  Not Found
-    // throw Error(errorName.BAD_REQUEST); //  Bad Request
     return this.transactionService.test();
   }
 
@@ -56,12 +52,18 @@ export class TransactionResolver {
           }
   */
   @Query((returns) => NFT)
-  findOne(
+  async findOne(
     @Args("id", { type: () => ID }) id: number,
     @Args("address", { type: () => String }) address: string
   ): Promise<NFT> {
-    console.log(id, address);
-    return this.transactionService.findOne(id, address);
+    const formatError = new FormatError();
+    if (id === undefined) throw Error(formatError.BAD_REQUEST);
+    try {
+      return await this.transactionService.findOne(id, address);
+    } catch (e) {
+      console.log(e);
+      throw Error(formatError.NOT_FOUND);
+    }
   }
 
   /*
@@ -70,7 +72,6 @@ export class TransactionResolver {
   */
   @Mutation((returns) => String)
   burn(@Args("id", { type: () => ID }) id: number): Promise<string> {
-    // console.log(id);
     return this.transactionService.burn(id);
   }
 
@@ -83,7 +84,6 @@ export class TransactionResolver {
     @Args("id", { type: () => ID }) id: number,
     @Args("receiver", { type: () => String }) receiver: string
   ): Promise<string> {
-    console.log(id, receiver);
     return this.transactionService.transfer(id, receiver);
   }
 }
