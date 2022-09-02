@@ -1,11 +1,11 @@
 //  External Dependencies
-import { Injectable } from '@nestjs/common';
-import * as fcl from '@onflow/fcl';
+import { Injectable } from "@nestjs/common";
+import * as fcl from "@onflow/fcl";
 
 //  Internal Dependencies
-import { NFT } from './types/nft.types';
-import { authorizationFunction } from '../flow-auth';
-import Flow from '../../flow.json';
+import { NFT } from "./types/nft.types";
+import { authorizationFunction } from "../flow-auth";
+import Flow from "../../flow.json";
 
 import {
   mintTx,
@@ -13,7 +13,7 @@ import {
   findOneTx,
   burnTx,
   transferTx,
-} from '../../cadence/transactions/apis';
+} from "../../cadence/transactions/apis";
 
 @Injectable()
 export class TransactionService {
@@ -25,14 +25,14 @@ export class TransactionService {
 
   //  Returns Test String
   test(): string {
-    return 'GraphQL: Transaction works';
+    return "GraphQL: Transaction works";
   }
 
   //  Create the NFT on the blockchain and return the transactionID
   async mint(
     name: string,
     description: string,
-    thumbnail: string,
+    thumbnail: string
   ): Promise<string> {
     const transactionId = await fcl.mutate({
       cadence: mintTx,
@@ -57,7 +57,7 @@ export class TransactionService {
   async findMany(
     address: string,
     limit: number,
-    offset: number,
+    offset: number
   ): Promise<NFT[]> {
     limit = limit ?? 5;
     offset = offset ?? 0;
