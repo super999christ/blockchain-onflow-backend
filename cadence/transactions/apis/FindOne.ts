@@ -4,7 +4,7 @@ const findOneTx = `
 
     pub fun main(id: UInt64, address: Address): &NonFungibleToken.NFT {
         let account = getAccount(address)
-        let receiverRef = account.getCapability<&ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(ExampleNFT.CollectionPublicPath)
+        let receiverRef = account.getCapability<&{NonFungibleToken.CollectionPublic}>(ExampleNFT.CollectionPublicPath)
             .borrow() ?? panic("Could not borrow receiver reference")
         return receiverRef.borrowNFT(id: id)
     }

@@ -17,7 +17,10 @@ import {
 
 @Injectable()
 export class TransactionService {
-  authrization = authorizationFunction(); // authentication
+  authrization = authorizationFunction(
+    Flow.accounts['dev-account'].address,
+    Flow.accounts['dev-account'].key,
+  ); // authentication
   devAddress = `0x${Flow.accounts['dev-account'].address}`;
 
   //  Returns Test String

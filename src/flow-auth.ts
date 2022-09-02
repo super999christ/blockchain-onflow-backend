@@ -19,14 +19,12 @@ const signWithKey = (privateKey: string, msg: string) => {
   return Buffer.concat([r, s]).toString('hex');
 };
 
-export const authorizationFunction = () => {
+export const authorizationFunction = (address: string, pk: string) => {
   return async (account: any = {}) => {
-    const data = await fcl.send([fcl.getAccount('01cf0e2f2f715450')]);
+    const data = await fcl.send([fcl.getAccount(address)]);
     const user = data.account;
     const key = user.keys[0];
 
-    const pk =
-      'd30728757a139fcbb33d28fe922c27e3febaf969272bdafde5f0a86291aec25c';
     const sign = signWithKey;
 
     return {
