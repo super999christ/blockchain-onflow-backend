@@ -5,10 +5,10 @@ const burnTx = `
     transaction(id: UInt64) {
 
         // The reference to the collection that will be burning the NFT
-        let acctRef: &ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection} 
-
+        let acctRef: &{NonFungibleToken.CollectionPublic} 
+        
         prepare(acct: AuthAccount) {
-            self.acctRef = acct.getCapability<&ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(ExampleNFT.CollectionPublicPath)
+            self.acctRef = acct.getCapability<&{NonFungibleToken.CollectionPublic}>(ExampleNFT.CollectionPublicPath)
                 .borrow() ?? panic("Could not borrow receiver reference")
         }
 
