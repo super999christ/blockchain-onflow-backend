@@ -8,23 +8,28 @@ const mintTx = `
     transaction(name: String, description: String, thumbnail: String) {
 
         // The reference to the collection that will be receiving the NFT
-        let receiverRef: &ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}
+        let receiverRef: &{NonFungibleToken.CollectionPublic}
+
+        // The reference to the minter
+        let minterRef: &ExampleNFT.NFTMinter
 
         prepare(acct: AuthAccount) {
-            self.receiverRef = acct.getCapability<&ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(ExampleNFT.CollectionPublicPath)
+            self.receiverRef = acct.getCapability<&{NonFungibleToken.CollectionPublic}>(ExampleNFT.CollectionPublicPath)
                 .borrow() ?? panic("Could not borrow receiver reference")
+
+            self.minterRef = acct.borrow<&ExampleNFT.NFTMinter>(from: ExampleNFT.MinterStoragePath)
+                ?? panic("Could not borrow owner's NFT minter reference")
         }
 
         execute {
             // Create a new NFT
-            let newNFT <- ExampleNFT.mintNFT(
+            self.minterRef.mintNFT(
+                recipient: self.receiverRef,
                 name: name,
                 description: description,
                 thumbnail: thumbnail,
                 royalties: []
             )
-
-            self.receiverRef.deposit(token: <- newNFT)
         }
     }
 `;

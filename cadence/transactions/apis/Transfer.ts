@@ -5,17 +5,17 @@ const burnTx = `
     transaction(id: UInt64, receiver: Address) {
 
         // The reference to the collection that will be sending the NFT
-        let acctRef: &ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection} 
+        let acctRef: &{NonFungibleToken.CollectionPublic}
 
         // The reference to the collection that will be receiving the NFT
-        let receiverRef: &ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection} 
+        let receiverRef: &{NonFungibleToken.CollectionPublic}
 
         prepare(acct: AuthAccount) {
-            self.acctRef = acct.borrow<&ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(from: ExampleNFT.CollectionStoragePath)
+            self.acctRef = acct.borrow<&{NonFungibleToken.CollectionPublic}>(from: ExampleNFT.CollectionStoragePath)
                 ?? panic("Could not borrow a reference to the owner's collection")
             
             let receiverAcct = getAccount(receiver)
-            self.receiverRef = receiverAcct.getCapability<&ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(ExampleNFT.CollectionPublicPath)
+            self.receiverRef = receiverAcct.getCapability<&{NonFungibleToken.CollectionPublic}>(ExampleNFT.CollectionPublicPath)
                 .borrow() ?? panic("Could not borrow receiver reference")
             if (self.acctRef == self.receiverRef) {
                 panic("Can not transfer to the same account.")

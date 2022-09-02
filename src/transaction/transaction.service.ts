@@ -18,14 +18,10 @@ import {
 @Injectable()
 export class TransactionService {
   authrization = authorizationFunction(
-    Flow.accounts["dev-account"].address,
-    Flow.accounts["dev-account"].key
+    Flow.accounts['dev-account'].address,
+    Flow.accounts['dev-account'].key,
   ); // authentication
-  authrization1 = authorizationFunction(
-    Flow.accounts["emulator-account"].address,
-    Flow.accounts["emulator-account"].key
-  ); // authentication
-  devAddress = `0x${Flow.accounts["dev-account"].address}`;
+  devAddress = `0x${Flow.accounts['dev-account'].address}`;
 
   //  Returns Test String
   test(): string {

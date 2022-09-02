@@ -225,7 +225,7 @@ pub contract ExampleNFT: NonFungibleToken {
   }
 
   // public function that anyone can call to create a new empty collection
-  pub fun createEmptyCollection(): @NonFungibleToken.Collection {
+  pub fun createEmptyCollection(): @ExampleNFT.Collection {
     return <- create Collection()
   }
 
@@ -265,11 +265,11 @@ pub contract ExampleNFT: NonFungibleToken {
     self.MinterStoragePath = /storage/ExampleNFTMinter
 
     // Create a Collection resource and save it to storage
-    let collection <- create Collection()
+    let collection <- ExampleNFT.createEmptyCollection()
     self.account.save(<-collection, to: self.CollectionStoragePath)
 
     // create a public capability for the collection
-    self.account.link<&ExampleNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(
+    self.account.link<&{NonFungibleToken.CollectionPublic}>(
       self.CollectionPublicPath, 
       target: self.CollectionStoragePath
     )
@@ -279,22 +279,6 @@ pub contract ExampleNFT: NonFungibleToken {
     self.account.save(<-minter, to: self.MinterStoragePath)
 
     emit ContractInitialized()
-  }
-
-  pub fun mintNFT(
-    name: String,
-    description: String,
-    thumbnail: String,
-    royalties: [MetadataViews.Royalty]
-  ): @NFT {
-    // create a new NFT
-    let newNFT <- create NFT(
-      name: name,
-      description: description,
-      thumbnail: thumbnail,
-      royalties: royalties
-    )
-    return <- newNFT;
   }
 }
  
