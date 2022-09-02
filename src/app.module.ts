@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import FormatError from 'easygraphql-format-error';
+import { GraphQLError, GraphQLFormattedError } from 'graphql';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -17,6 +19,10 @@ import { upperDirectiveTransformer } from './common/directives/upper-case.direct
       typePaths: ['./**/*.graphql'],
       // transformSchema: (schema) => upperDirectiveTransformer(schema, 'upper'),
       installSubscriptionHandlers: true,
+      formatError: (error) => {
+        const formatError = new FormatError();
+        return formatError.getError(error);
+      },
     }),
   ],
   controllers: [AppController],
