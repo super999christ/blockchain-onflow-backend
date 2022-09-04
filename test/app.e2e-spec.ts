@@ -6,13 +6,13 @@ import request from "supertest";
 
 import { AppModule } from "../src/app.module";
 import { TransactionModule } from "../src/transaction/transaction.module";
-
 import "../src/flow-config";
+import { devAccount, emulatorAccount } from "../src/flow-accounts";
 
 describe("AppController (e2e)", () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     //  Configuring GraphQL
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -34,8 +34,7 @@ describe("AppController (e2e)", () => {
     await app.close();
   });
 
-  let token;
-  //  Validate NFT Object
+  // Validate NFT Object
   const validateNFT = (item) => {
     if (
       item.name !== null &&
@@ -76,8 +75,8 @@ describe("AppController (e2e)", () => {
       .send({
         operationName: "test",
         query: `query test {
-        test
-      }`,
+          test
+        }`,
       })
       .expect(200)
       .expect(({ body }) => {
@@ -106,7 +105,7 @@ describe("AppController (e2e)", () => {
         let regPattern = /[0-9a-f]{64}/g;
         expect(regPattern.test(data)).toBe(true);
       });
-  });
+  }, 10000);
 
   //  Test: GraphQL / findMany
   //  Acceptance Criteria:
@@ -120,10 +119,10 @@ describe("AppController (e2e)", () => {
       .send({
         operationName: "testFindMany",
         query: `query testFindMany {
-        findMany(address: "0x01cf0e2f2f715450", limit: 5, offset: 2) {
-          name, description, file {url}
-        }
-      }`,
+          findMany(address: "${devAccount}", limit: 5, offset: 0) {
+            name, description, file {url}
+          }
+        }`,
       })
       .expect(200)
       .expect(({ body }) => {
@@ -146,7 +145,7 @@ describe("AppController (e2e)", () => {
       .send({
         operationName: "testFindOne",
         query: `query testFindOne {
-        findOne(id: 0, address: "0x01cf0e2f2f715450") {
+        findOne(id: 0, address: "${devAccount}") {
             name, description, file {url}
           }
         }`,
@@ -171,7 +170,7 @@ describe("AppController (e2e)", () => {
       .send({
         operationName: "testBurn",
         query: `mutation testBurn {
-        burn(id: 1)
+        burn(id: 0)
       }`,
       })
       .expect(200)
@@ -193,8 +192,8 @@ describe("AppController (e2e)", () => {
       .send({
         operationName: "testTransfer",
         query: `mutation testTransfer {
-        transfer(id: 1, receiver: "0x01cf0e2f2f715450")
-      }`,
+          transfer(id: 0, receiver: "${emulatorAccount}")
+        }`,
       })
       .expect(200)
       .expect(({ body }) => {

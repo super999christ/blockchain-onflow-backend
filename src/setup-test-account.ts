@@ -2,15 +2,15 @@ import * as fcl from "@onflow/fcl";
 import { authorizationFunction } from "./flow-auth";
 import Flow from "../flow.json";
 
-const setTestAccount = async (account: string) => {
+const setupTestAccount = async (account: string) => {
   const auth = authorizationFunction(
     Flow.accounts[account].address,
     Flow.accounts[account].key
   );
   const transactionId = await fcl.mutate({
     cadence: `
-      import ExampleNFT from 0x01cf0e2f2f715450
-      import NonFungibleToken from 0xf8d6e0586b0a20c7
+      import ExampleNFT from 0xExampleNFT
+      import NonFungibleToken from 0xTokens
 
       transaction {
         prepare(acct: AuthAccount) {
@@ -32,4 +32,4 @@ const setTestAccount = async (account: string) => {
   });
 };
 
-export default setTestAccount;
+export default setupTestAccount;

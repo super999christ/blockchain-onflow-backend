@@ -1,6 +1,6 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID } from "@nestjs/graphql";
 
-import { FileInfo } from './file.types';
+import { FileInfo } from "./file.types";
 
 @ObjectType()
 export class NFT {

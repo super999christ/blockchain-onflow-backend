@@ -1,6 +1,52 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { devAccount } from "../flow-accounts";
+
 import { TransactionResolver } from "./transaction.resolver";
 import { TransactionService } from "./transaction.service";
+
+const findManyData = [
+  {
+    id: 0,
+    name: "name1",
+    description: "desc1",
+    thumbnail: "thumb1",
+    file: {
+      url: "fake1",
+    },
+    owner: "owner1",
+  },
+  {
+    id: 1,
+    name: "name2",
+    description: "desc2",
+    thumbnail: "thumb2",
+    file: {
+      url: "fake2",
+    },
+    owner: "owner2",
+  },
+  {
+    id: 2,
+    name: "name3",
+    description: "desc3",
+    thumbnail: "thumb3",
+    file: {
+      url: "fake3",
+    },
+    owner: "owner3",
+  },
+];
+
+const findOneData = {
+  id: 0,
+  name: "name1",
+  description: "desc1",
+  thumbnail: "thumb1",
+  file: {
+    url: "fake1",
+  },
+  owner: "owner1",
+};
 
 describe("TransactionResolver", () => {
   let resolver: TransactionResolver;
@@ -18,49 +64,9 @@ describe("TransactionResolver", () => {
             ),
 
             findMany: jest.fn(
-              (address: string, limit: number, offset: number) => [
-                {
-                  id: 0,
-                  name: "name1",
-                  description: "desc1",
-                  thumbnail: "thumb1",
-                  file: {
-                    url: "fake1",
-                  },
-                  owner: "owner1",
-                },
-                {
-                  id: 1,
-                  name: "name2",
-                  description: "desc2",
-                  thumbnail: "thumb2",
-                  file: {
-                    url: "fake2",
-                  },
-                  owner: "owner2",
-                },
-                {
-                  id: 2,
-                  name: "name3",
-                  description: "desc3",
-                  thumbnail: "thumb3",
-                  file: {
-                    url: "fake3",
-                  },
-                  owner: "owner3",
-                },
-              ]
+              (address: string, limit: number, offset: number) => findManyData
             ),
-            findOne: jest.fn((id: number, address: string) => ({
-              id: 0,
-              name: "name1",
-              description: "desc1",
-              thumbnail: "thumb1",
-              file: {
-                url: "fake1",
-              },
-              owner: "owner1",
-            })),
+            findOne: jest.fn((id: number, address: string) => findOneData),
             burn: jest.fn(
               (id: number) =>
                 "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690"
@@ -81,7 +87,6 @@ describe("TransactionResolver", () => {
   });
 
   describe("mint", () => {
-    // eslint-disable-next-line prettier/prettier
     // resolver, service
     it("should create an ExampleNFT on the blockchain ", async () => {
       expect(
@@ -98,53 +103,13 @@ describe("TransactionResolver", () => {
 
   describe("findMany", () => {
     it("should take an address as input and return all the NFTs owned by the address", async () => {
-      expect(await resolver.findMany("0x01cf0e2f2f715450", 5, 0)).toEqual([
-        {
-          id: 0,
-          name: "name1",
-          description: "desc1",
-          thumbnail: "thumb1",
-          file: {
-            url: "fake1",
-          },
-          owner: "owner1",
-        },
-        {
-          id: 1,
-          name: "name2",
-          description: "desc2",
-          thumbnail: "thumb2",
-          file: {
-            url: "fake2",
-          },
-          owner: "owner2",
-        },
-        {
-          id: 2,
-          name: "name3",
-          description: "desc3",
-          thumbnail: "thumb3",
-          file: {
-            url: "fake3",
-          },
-          owner: "owner3",
-        },
-      ]);
+      expect(await resolver.findMany(devAccount, 5, 0)).toEqual(findManyData);
     });
   });
 
   describe("findOne", () => {
     it("should take an address and NFT ID as input", async () => {
-      expect(await resolver.findOne(0, "0x01cf0e2f2f715450")).toEqual({
-        id: 0,
-        name: "name1",
-        description: "desc1",
-        thumbnail: "thumb1",
-        file: {
-          url: "fake1",
-        },
-        owner: "owner1",
-      });
+      expect(await resolver.findOne(0, devAccount)).toEqual(findOneData);
     });
   });
 
@@ -163,7 +128,7 @@ describe("TransactionResolver", () => {
           // The ID of the NFT to transfer
           0,
           // The address of the account that will receive the NFT
-          "0x01cf0e2f2f715450"
+          devAccount
         )
       ).toEqual(
         "e0b97916b821adc178390f075bb44bb6e42d0617ec2c51bf966f40506e79d690"

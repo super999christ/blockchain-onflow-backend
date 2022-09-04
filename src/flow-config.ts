@@ -1,8 +1,9 @@
-import * as fcl from '@onflow/fcl';
+import * as fcl from "@onflow/fcl";
+import { devAccount, emulatorAccount } from "./flow-accounts";
 
 fcl
   .config()
-  .put('accessNode.api', 'http://localhost:8888')
-  .put('0xTokens', '0xf8d6e0586b0a20c7')
-  .put('0xExampleNFT', '0x01cf0e2f2f715450')
-  .put('discovery.wallet', 'http://localhost:3569/fcl/authn');
+  .put("accessNode.api", "http://localhost:8888")
+  .put("0xTokens", emulatorAccount)
+  .put("0xExampleNFT", devAccount)
+  .put("discovery.wallet", "http://localhost:3569/fcl/authn");

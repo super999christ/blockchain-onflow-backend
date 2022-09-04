@@ -1,12 +1,11 @@
 import { Test, TestingModule } from "@nestjs/testing";
+
 import { TransactionService } from "./transaction.service";
-
 import "../flow-config";
-
-jest.useRealTimers();
+import setupTestAccount from "../setup-test-account";
+import { devAccount, emulatorAccount } from "../flow-accounts";
 
 describe("TransactionService", () => {
-  // eslint-disable-next-line prettier/prettier
   let service: TransactionService;
   let addedID;
   let transferData;
@@ -19,6 +18,12 @@ describe("TransactionService", () => {
     { name: "fake4", description: "fake4", thumbnail: "fake4" },
   ];
 
+  const mockToken = {
+    name: "MockName",
+    description: "MockDescription",
+    thumbnail: "MockThumbnail",
+  };
+
   const compareData = (source, nft) => {
     if (
       source.name === nft.name &&
@@ -29,11 +34,19 @@ describe("TransactionService", () => {
     return false;
   };
 
-  beforeEach(async () => {
+  const sortFunc = (nftA, nftB) => {
+    if (nftA.id < nftB.id) return -1;
+    else if (nftA.id > nftB.id) return 1;
+    else return 0;
+  };
+
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [TransactionService],
     }).compile();
     service = module.get<TransactionService>(TransactionService);
+
+    await setupTestAccount("emulator-account");
   });
 
   it("should be defined", () => {
@@ -41,18 +54,16 @@ describe("TransactionService", () => {
   });
 
   describe("mint", () => {
-    // eslint-disable-next-line prettier/prettier
     it("should create an NFT on the blockchain ", async () => {
-      const result = await service.mint("Test-Mint", "Test-Mint", "Test-Mint");
+      const result = await service.mint(
+        mockToken.name,
+        mockToken.description,
+        mockToken.thumbnail
+      );
 
-      const nftDatas = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
+      const nftDatas = await service.findMany(devAccount, 10000, 0);
       const createdNFT = nftDatas.find((nft) => {
-        if (
-          nft.name === "Test-Mint" &&
-          nft.description === "Test-Mint" &&
-          nft.thumbnail === "Test-Mint"
-        )
-          return nft;
+        if (compareData(nft, mockToken)) return nft;
       });
       expect(createdNFT).not.toBe(undefined);
       addedID = createdNFT.id;
@@ -64,34 +75,32 @@ describe("TransactionService", () => {
 
   describe("findOne", () => {
     it("should return an NFT with specified ID", async () => {
-      const result = await service.findOne(addedID, "0x01cf0e2f2f715450");
-      expect(
-        result.name === "Test-Mint" &&
-          result.description === "Test-Mint" &&
-          result.thumbnail === "Test-Mint"
-      ).toBe(true);
+      const result = await service.findOne(addedID, devAccount);
+      expect(compareData(result, mockToken)).toBe(true);
     });
   });
 
   describe("burn", () => {
     it("should delete the NFT from blockchain", async () => {
-      const result = await service.burn(addedID);
+      // before burn
+      const prevNftDatas = await service.findMany(devAccount, 10000, 0);
+      const prevNft = prevNftDatas.find((nft) => nft.id === addedID);
+      expect(prevNft).not.toBe(undefined);
 
+      // after burn
+      const result = await service.burn(addedID);
       const regPattern = /[0-9a-f]{64}/g;
       expect(regPattern.test(result)).toBe(true);
 
-      const nftDatas = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
-      const createdNFT = nftDatas.find((nft) => {
-        if (nft.id === addedID) return nft;
-      });
-      expect(createdNFT).toBe(undefined);
+      const nftDatas = await service.findMany(devAccount, 10000, 0);
+      const burntNft = nftDatas.find((nft) => nft.id === addedID);
+      expect(burntNft).toBe(undefined);
     });
   });
 
   describe("findMany", () => {
     it("should return all the created data", async () => {
-      let i;
-      for (i = 0; i < 4; i++) {
+      for (let i = 0; i < 4; i++) {
         const tId = await service.mint(
           fakeData[i].name,
           fakeData[i].description,
@@ -101,12 +110,8 @@ describe("TransactionService", () => {
         expect(regPattern.test(tId)).toBe(true);
       }
 
-      const nftData = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
-      nftData.sort((nftA, nftB) => {
-        if (nftA.id < nftB.id) return -1;
-        else if (nftA.id > nftB.id) return 1;
-        else return 0;
-      });
+      const nftData = await service.findMany(devAccount, 10000, 0);
+      nftData.sort(sortFunc);
       const addedData = nftData.slice(-4);
       expect(addedData.length).toBe(4);
       transferData = addedData[0];
@@ -120,23 +125,16 @@ describe("TransactionService", () => {
 
   describe("transfer", () => {
     it("should check whether it is transfered", async () => {
-      const txID = await service.transfer(
-        transferData.id,
-        "0xf8d6e0586b0a20c7"
-      );
+      const txID = await service.transfer(transferData.id, emulatorAccount);
       const regPattern = /[0-9a-f]{64}/g;
       expect(regPattern.test(txID)).toBe(true);
-      let nftData = await service.findMany("0x01cf0e2f2f715450", 10000, 0);
-      nftData.sort((nftA, nftB) => {
-        if (nftA.id < nftB.id) return -1;
-        else if (nftA.id > nftB.id) return 1;
-        else return 0;
-      });
+      let nftData = await service.findMany(devAccount, 10000, 0);
+      nftData.sort(sortFunc);
       const resultA = nftData.find((item) => {
         if (item.id === transferData.id) return item;
       });
       expect(resultA).toBe(undefined);
-      nftData = await service.findMany("0xf8d6e0586b0a20c7", 10000, 0);
+      nftData = await service.findMany(emulatorAccount, 10000, 0);
 
       const transferedData = nftData.find((nft) => nft.id === transferData.id);
       expect(compareData(transferData, transferedData)).toBe(true);

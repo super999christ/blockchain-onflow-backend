@@ -1,10 +1,6 @@
-//  External Dependencies
-import { BadRequestException, HttpException } from "@nestjs/common";
 import { Query, Resolver, Mutation, Args, ID, Int } from "@nestjs/graphql";
-import { throwHttpGraphQLError } from "apollo-server-core/dist/runHttpQuery";
 import FormatError from "easygraphql-format-error";
 
-//  Internal Dependencies
 import { TransactionService } from "./transaction.service";
 import { NFT } from "./types/nft.types";
 
@@ -71,8 +67,8 @@ export class TransactionResolver {
     burn(id: 1)
   */
   @Mutation((returns) => String)
-  burn(@Args("id", { type: () => ID }) id: number): Promise<string> {
-    return this.transactionService.burn(id);
+  async burn(@Args("id", { type: () => ID }) id: number): Promise<string> {
+    return await this.transactionService.burn(id);
   }
 
   /*
@@ -80,10 +76,10 @@ export class TransactionResolver {
     transfer(id: 1, receiver: "0x01cf0e2f2f715450")
   */
   @Mutation((returns) => String)
-  transfer(
+  async transfer(
     @Args("id", { type: () => ID }) id: number,
     @Args("receiver", { type: () => String }) receiver: string
   ): Promise<string> {
-    return this.transactionService.transfer(id, receiver);
+    return await this.transactionService.transfer(id, receiver);
   }
 }

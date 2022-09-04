@@ -1,12 +1,9 @@
-//  External Dependencies
 import { Injectable } from "@nestjs/common";
 import * as fcl from "@onflow/fcl";
 
-//  Internal Dependencies
 import { NFT } from "./types/nft.types";
 import { authorizationFunction } from "../flow-auth";
 import Flow from "../../flow.json";
-
 import {
   mintTx,
   findManyTx,
@@ -28,13 +25,13 @@ export class TransactionService {
     return "GraphQL: Transaction works";
   }
 
-  //  Create the NFT on the blockchain and return the transactionID
+  //  Creates an NFT on the blockchain and returns transactionID
   async mint(
     name: string,
     description: string,
     thumbnail: string
   ): Promise<string> {
-    // execute the mutation
+    // execute mutation
     const transactionId = await fcl.mutate({
       cadence: mintTx,
       args: (arg, t) => [
@@ -54,41 +51,29 @@ export class TransactionService {
   //  Get NFT datas from given account on the Blockchain
   async findMany(
     address: string,
-    limit: number,
-    offset: number
+    limit: number = 5,
+    offset: number = 0
   ): Promise<NFT[]> {
-    limit = limit ?? 5;
-    offset = offset ?? 0;
-    // execute the query
+    // execute query
     const datas = await fcl.query({
       cadence: findManyTx,
-      args: (arg, t) => [arg(address ? address : this.devAddress, t.Address)],
+      args: (arg, t) => [arg(address || this.devAddress, t.Address)],
     });
 
     const processedData = datas.map((item) => {
-      item.file = {};
-      item.file.url = item.thumbnail;
+      item.file = {
+        url: item.thumbnail,
+      };
       return item;
     });
 
-    const result = [];
-    for (
-      let i = offset * limit;
-      i <
-      ((offset + 1) * limit < processedData.length
-        ? (offset + 1) * limit
-        : processedData.length);
-      i++
-    ) {
-      result.push(processedData[i]);
-    }
-
+    const result = processedData.slice(offset * limit, (offset + 1) * limit);
     return result;
   }
 
   //  Get NFT data from give account with given id on the Blockchain
   async findOne(id: number, address: string): Promise<NFT> {
-    // execute the query
+    // execute query
     const data = await fcl.query({
       cadence: findOneTx,
       args: (arg, t) => [
@@ -96,14 +81,15 @@ export class TransactionService {
         arg(address ? address : this.devAddress, t.Address),
       ],
     });
-    data.file = {};
-    data.file.url = data.thumbnail;
+    data.file = {
+      url: data.thumbnail,
+    };
     return data;
   }
 
   //  Erase the NFT data from Blockchain
   async burn(id: number): Promise<string> {
-    // excute the mutation
+    // excute mutation
     const transactionId = await fcl.mutate({
       cadence: burnTx,
       args: (arg, t) => [arg(id.toString(), t.UInt64)],
@@ -118,7 +104,7 @@ export class TransactionService {
 
   //  Trnasfer NFT with id to receiver address
   async transfer(id: number, receiver: string): Promise<string> {
-    // excute the mutation
+    // excute mutation
     const transactionId = await fcl.mutate({
       cadence: transferTx,
       args: (arg, t) => [arg(id, t.UInt64), arg(receiver, t.Address)],
